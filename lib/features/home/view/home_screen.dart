@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:praying_app/features/home/view/widgets/counter.dart';
 import 'package:praying_app/features/home/view/widgets/progress_bar.dart';
 import 'package:timeline_tile/timeline_tile.dart';
@@ -8,6 +9,7 @@ import '../provider/prayer_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
+
   @override
   ConsumerState createState() => _HomeScreenState();
 }
@@ -20,7 +22,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final asyncPrayer = ref.watch(prayerProvider);
 
     return Scaffold(
-      backgroundColor: Colors.deepPurpleAccent,
+      backgroundColor: Color(0xFF3551F2),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -42,10 +44,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                         loading: () => const CircularProgressIndicator(),
-                        error: (err, _) => Text("unKnown"),
+                        error: (err, _) => Text(
+                          "unKnown",
+                          style: const TextStyle(color: Colors.white),
+                        ),
                       ),
                       SizedBox(width: 50),
                       asyncPrayer.when(
@@ -55,6 +61,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
+                              color: Colors.white,
                             ),
                             softWrap: true,
                             overflow: TextOverflow.ellipsis,
@@ -66,7 +73,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             const Center(child: CircularProgressIndicator()),
                         error: (err, _) {
                           print(err);
-                          return Text('error');
+                          return Text(
+                            'error',
+                            style: const TextStyle(color: Colors.white),
+                          );
                         },
                       ),
                     ],
@@ -101,11 +111,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           'Asr': parseTime(data.timings.asr),
                           'Maghrib': parseTime(data.timings.maghrib),
                           'Isha': parseTime(data.timings.isha),
-                        }
+                        },
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 12),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
@@ -113,18 +123,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.circle, color: Colors.yellow),
+                            SvgPicture.asset(
+                              'assets/icons/home/f.svg',
+                              width: 50,
+                              height: 50,
+                              color: Color(0xFFFFDC80),
+                            ),
+                            SizedBox(width: 8),
                             Column(
-                              children: [Text('Fajr'), Text(data.timings.fajr)],
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Fajr',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Text(
+                                  data.timings.fajr,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                         Row(
                           children: [
                             Column(
-                              children: [Text('Isha'), Text(data.timings.isha)],
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Isha',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Text(
+                                  data.timings.isha,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Icon(Icons.circle, color: Colors.yellow),
+                            SizedBox(width: 8),
+                            SvgPicture.asset(
+                              'assets/icons/home/i.svg',
+                              width: 50,
+                              height: 50,
+                              color: Color(0xFFFFDC80),
+                            ),
                           ],
                         ),
                       ],
@@ -143,7 +203,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     topLeft: Radius.circular(40),
                     topRight: Radius.circular(40),
                   ),
-                  color: Colors.white,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Color(0xFF171923)
+                      : Colors.white,
                 ),
                 child: asyncPrayer.when(
                   data: (data) => Padding(
@@ -194,13 +256,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   DateTime parseTime(String time) {
     final now = DateTime.now();
     final parts = time.split(':'); // ["05", "10"]
-
     final hour = int.parse(parts[0]);
     final minute = int.parse(parts[1]);
-
     return DateTime(now.year, now.month, now.day, hour, minute);
   }
-
 }
 
 class PrayItemList extends StatelessWidget {
@@ -241,37 +300,57 @@ class PrayItemList extends StatelessWidget {
           Container(
             height: 70,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Color(0xFF2C2F41)
+                  : Colors.white,
               borderRadius: BorderRadius.circular(25),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 10,
-                  offset: Offset(0, 2),
-                ),
-              ],
+              boxShadow: Theme.of(context).brightness == Brightness.dark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        spreadRadius: 2,
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
             ),
             margin: EdgeInsets.all(5),
             padding: EdgeInsets.all(10),
             child: Row(
               spacing: 10,
               children: [
-                Icon(Icons.circle, color: Colors.yellow),
+                getPrayIconWidget(index),
                 SingleChildScrollView(
                   scrollDirection: Axis.vertical,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(prayName, style: TextStyle(fontSize: 12)),
-                      Text(prayTime, style: TextStyle(fontSize: 12)),
+                      Text(
+                        prayName,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        prayTime,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey,
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 Spacer(),
-                IconButton(onPressed: () {}, icon: Icon(Icons.add_alert)),
-                IconButton(onPressed: () {}, icon: Icon(Icons.done_all)),
+                IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.notifications_active),
+                ),
+                IconButton(onPressed: () {}, icon: Icon(Icons.check_circle)),
               ],
             ),
           ),
@@ -280,10 +359,26 @@ class PrayItemList extends StatelessWidget {
     );
   }
 
+  Widget getPrayIconWidget(int index) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: SvgPicture.asset(
+        'assets/icons/home/${index + 1}.svg',
+        width: 40,
+        height: 40,
+        color: Colors.blue,
+      ),
+    );
+  }
+
   bool isPrayerNow(String time) {
     final now = DateTime.now();
     final target = parseTime(time);
-    return now.isAfter(target) && now.isBefore(target.add(const Duration(minutes: 1)));
+    return now.isBefore(target) &&
+        now.isAfter(target.subtract(const Duration(minutes: 30)));
   }
 
   DateTime parseTime(String time) {

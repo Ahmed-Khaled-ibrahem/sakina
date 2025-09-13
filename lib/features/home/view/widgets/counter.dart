@@ -95,6 +95,7 @@ class _PrayerCountdownWidgetState extends State<PrayerCountdownWidget> {
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ],
@@ -102,12 +103,19 @@ class _PrayerCountdownWidgetState extends State<PrayerCountdownWidget> {
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("$_nextPrayer will start in", style: TextStyle()),
+                  Text(
+                    "$_nextPrayer will start in",
+                    style: TextStyle(color: Colors.white),
+                  ),
                   Text(
                     "${_remaining.inHours.toString().padLeft(2, '0')}:"
                     "${(_remaining.inMinutes % 60).toString().padLeft(2, '0')}:"
                     "${(_remaining.inSeconds % 60).toString().padLeft(2, '0')}",
-                    style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900),
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),

@@ -88,7 +88,7 @@ class PrayerProgressPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.orangeAccent
+      ..color = Color(0xFFF9BF29)
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..isAntiAlias = true
@@ -96,7 +96,7 @@ class PrayerProgressPainter extends CustomPainter {
       ..strokeWidth = 15;
 
     final back = Paint()
-      ..color = Colors.deepPurple
+      ..color = Color(0xFF0616C6)
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..isAntiAlias = true
@@ -125,12 +125,7 @@ class PrayerProgressPainter extends CustomPainter {
         Paint()..color = Colors.black26,
       );
 
-      canvas.drawCircle(
-        Offset(dx, dy),
-        6,
-        Paint()..color = Colors.deepPurpleAccent,
-      );
-
+      canvas.drawCircle(Offset(dx, dy), 6, Paint()..color = Color(0xFF5460DF));
     }
   }
 

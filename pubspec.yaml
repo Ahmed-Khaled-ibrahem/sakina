@@ -13,7 +13,7 @@ dependencies:
   # UI & Icons
   cupertino_icons: ^1.0.8
   google_fonts: ^6.3.1
-  flutter_svg: ^2.0.5
+  flutter_svg: ^2.2.1
   lottie: ^3.3.1
 
   # Networking & Data
@@ -53,3 +53,7 @@ flutter:
   assets:
     - assets/
     - assets/translations/
+    - assets/icons/home/
+    - assets/icons/nav/
+    - assets/icons/azkar/
+    - assets/azkhar/

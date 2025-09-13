@@ -40,6 +40,7 @@ dependencies:
   flutter_screenutil: ^5.0.0+2  # used
   navbar_router: ^0.7.7
   timeline_tile: ^2.0.0
+  flutter_launcher_icons: ^0.14.4
 
 
 dev_dependencies:
@@ -56,4 +57,5 @@ flutter:
     - assets/icons/home/
     - assets/icons/nav/
     - assets/icons/azkar/
+    - assets/icons/ex/
     - assets/azkhar/

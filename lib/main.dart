@@ -1,19 +1,25 @@
 import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'app/app.dart';
 import 'app/providers/all_app_provider.dart';
+import 'firebase_options.dart';
 
 void main() {
   runZonedGuarded(
-        () async {
+    () async {
       WidgetsFlutterBinding.ensureInitialized();
+
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+
       await EasyLocalization.ensureInitialized();
 
-      // Lock device orientation
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
@@ -24,7 +30,6 @@ void main() {
       } catch (_) {
         await initializeDateFormatting('en', null);
       }
-
 
       FlutterError.onError = (FlutterErrorDetails details) {
         FlutterError.dumpErrorToConsole(details);
@@ -44,11 +49,14 @@ void main() {
           supportedLocales: const [Locale('en'), Locale('ar')],
           path: 'assets/translations',
           fallbackLocale: const Locale('en'),
-          child: UncontrolledProviderScope(container: globalContainer,child: App(),),
+          child: UncontrolledProviderScope(
+            container: globalContainer,
+            child: App(),
+          ),
         ),
       );
     },
-        (error, stack) {
+    (error, stack) {
       print("Uncaught async error: $error");
       print(stack);
     },

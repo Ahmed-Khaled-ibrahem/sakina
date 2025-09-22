@@ -6,7 +6,6 @@ import 'package:table_calendar/table_calendar.dart';
 
 class CalenderScreen extends ConsumerStatefulWidget {
   const CalenderScreen({super.key});
-
   @override
   CalenderScreenState createState() => CalenderScreenState();
 }

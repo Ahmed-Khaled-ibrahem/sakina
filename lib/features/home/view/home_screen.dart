@@ -10,7 +10,6 @@ import '../provider/prayer_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
-
   @override
   ConsumerState createState() => _HomeScreenState();
 }

@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:praying_app/features/calender/widget/circules.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../splash_screen/providers/prayer_entry.dart';
+import '../splash_screen/providers/real_time_data.dart';
 
 class CalenderScreen extends ConsumerStatefulWidget {
   const CalenderScreen({super.key});
+
   @override
   CalenderScreenState createState() => CalenderScreenState();
 }
@@ -14,12 +17,36 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
   DateTime focusedDay = DateTime.now();
   DateTime? selectedDay;
 
-  double outer = 0.25;
-  double middle = 0.5;
-  double inner = 0.15;
+  int todayPrays = 0;
+  int todayEx = 0;
+  int todayNawafl = 0;
+  int todayMistakes = 0;
+
+  void updateValues() {
+    todayEx = 0;
+    todayPrays = 0;
+    todayNawafl = 0;
+    todayMistakes = 0;
+
+    final entries = ref.read(todaysEntriesProvider);
+    for (final e in entries) {
+      if (e.category == 'ex') {
+        todayEx++;
+      } else if (e.category == 'nawafl') {
+        todayMistakes += (e.value.abs() / 2).round();
+        todayNawafl++;
+      } else if (e.category == 'praying') {
+        todayMistakes += (e.value.abs() / 2).round();
+        todayPrays++;
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(todaysEntriesProvider);
+    updateValues();
+
     return Scaffold(
       appBar: AppBar(title: const Text('Calender')),
       body: SingleChildScrollView(
@@ -52,19 +79,112 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Row(children: []),
+                          SizedBox(height: 20),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Image.asset(
+                                        'assets/icons/calender/1.png',
+                                        width: 20,
+                                      ),
+                                      Text(
+                                        '$todayPrays/5',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Image.asset(
+                                        'assets/icons/calender/2.png',
+                                        width: 20,
+                                      ),
+                                      Text(
+                                        '$todayEx/10',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.orange,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Image.asset(
+                                        'assets/icons/calender/3.png',
+                                        width: 20,
+                                      ),
+                                      Text(
+                                        '$todayMistakes/10',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Image.asset(
+                                        'assets/icons/calender/4.png',
+                                        width: 20,
+                                      ),
+                                      Text(
+                                        '$todayNawafl/5',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.purple,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     ConcentricProgress(
                       size: 150,
-                      outerProgress: outer,
-                      middleProgress: middle,
-                      innerProgress: inner,
+                      outerProgress: todayPrays / 5,
+                      middleProgress: todayEx / 10,
+                      innerProgress: todayMistakes / 10,
+                      innermostProgress: todayNawafl / 5,
+                      innermostColor: Colors.purple,
                       outerColor: Colors.blue,
                       middleColor: Colors.orange,
                       innerColor: Colors.green,
-                      strokeWidths: const [10, 10, 20],
+                      strokeWidths: const [10, 10, 10, 10],
                       duration: const Duration(seconds: 2),
                     ),
                   ],
@@ -92,18 +212,73 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
                 ),
                 calendarBuilders: CalendarBuilders(
                   defaultBuilder: (context, day, _) {
-                    return Center(
-                      child: Text(
-                        '${day.day}',
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    );
+                    return _buildDayWidget(day, isToday: false);
+                  },
+                  todayBuilder: (c, d, e) {
+                    return _buildDayWidget(d, isToday: true);
                   },
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  double? getProgress(DateTime target) {
+    int counter = 0;
+    final entries = ref.read(realtimeDataStateProvider);
+    final List<PrayerEntry> data = parseRealtimeData(entries ?? {});
+    data.forEach((element) {
+      if (element.dateTime.year == target.year &&
+          element.dateTime.month == target.month &&
+          element.dateTime.day == target.day) {
+        if (element.category == 'praying') {
+          counter++;
+        }
+      }
+    });
+    return counter / 5;
+  }
+
+  Widget _buildDayWidget(DateTime day, {required bool isToday}) {
+    return SizedBox(
+      height: 40,
+      width: 40,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CircularProgressIndicator(
+            value: getProgress(day) ?? 0,
+            strokeWidth: 3,
+            backgroundColor: Colors.grey.withOpacity(0.2),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              isToday ? Colors.blue : Colors.green,
+            ),
+          ),
+
+          Container(
+            height: 32,
+            width: 32,
+            decoration: BoxDecoration(
+              color: isToday
+                  ? Colors.blue.withOpacity(0.3)
+                  : Colors.transparent,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isToday ? Colors.white : Colors.grey,
+                width: 0.5,
+              ),
+            ),
+            child: Center(
+              child: Text(
+                day.day.toString(),
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

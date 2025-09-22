@@ -3,13 +3,17 @@ import 'package:flutter/material.dart';
 
 class ConcentricProgress extends StatefulWidget {
   final double size;
-  final double outerProgress; // 0.0 .. 1.0
+  final double outerProgress;
   final double middleProgress;
   final double innerProgress;
+  final double innermostProgress; // NEW
+
   final Color outerColor;
   final Color middleColor;
   final Color innerColor;
-  final List<double> strokeWidths; // [outer, middle, inner]
+  final Color innermostColor; // NEW
+
+  final List<double> strokeWidths; // [outer, middle, inner, innermost]
   final Duration duration;
   final Widget? centerWidget;
 
@@ -19,13 +23,15 @@ class ConcentricProgress extends StatefulWidget {
     required this.outerProgress,
     required this.middleProgress,
     required this.innerProgress,
+    required this.innermostProgress, // NEW
     this.outerColor = Colors.blue,
     this.middleColor = Colors.orange,
     this.innerColor = Colors.green,
-    this.strokeWidths = const [14, 10, 6],
+    this.innermostColor = Colors.purple, // NEW
+    this.strokeWidths = const [14, 10, 6, 4], // NEW
     this.duration = const Duration(milliseconds: 600),
     this.centerWidget,
-  })  : assert(strokeWidths.length == 3),
+  })  : assert(strokeWidths.length == 4),
         super(key: key);
 
   @override
@@ -38,10 +44,12 @@ class _ConcentricProgressState extends State<ConcentricProgress>
   late Animation<double> _outerAnim;
   late Animation<double> _middleAnim;
   late Animation<double> _innerAnim;
+  late Animation<double> _innermostAnim; // NEW
 
   double _lastOuter = 0;
   double _lastMiddle = 0;
   double _lastInner = 0;
+  double _lastInnermost = 0; // NEW
 
   @override
   void initState() {
@@ -49,6 +57,7 @@ class _ConcentricProgressState extends State<ConcentricProgress>
     _lastOuter = widget.outerProgress.clamp(0.0, 1.0);
     _lastMiddle = widget.middleProgress.clamp(0.0, 1.0);
     _lastInner = widget.innerProgress.clamp(0.0, 1.0);
+    _lastInnermost = widget.innermostProgress.clamp(0.0, 1.0); // NEW
 
     _controller = AnimationController(vsync: this, duration: widget.duration);
 
@@ -63,29 +72,30 @@ class _ConcentricProgressState extends State<ConcentricProgress>
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _innerAnim = Tween<double>(begin: _lastInner, end: widget.innerProgress.clamp(0.0, 1.0))
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _innermostAnim = Tween<double>(begin: _lastInnermost, end: widget.innermostProgress.clamp(0.0, 1.0)) // NEW
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
   }
 
   @override
   void didUpdateWidget(covariant ConcentricProgress oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // store last values so animation starts from previous state
     _lastOuter = _outerAnim.value;
     _lastMiddle = _middleAnim.value;
     _lastInner = _innerAnim.value;
+    _lastInnermost = _innermostAnim.value; // NEW
 
     _controller.duration = widget.duration;
     _controller.reset();
 
-    _outerAnim =
-        Tween<double>(begin: _lastOuter, end: widget.outerProgress.clamp(0.0, 1.0))
-            .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-    _middleAnim =
-        Tween<double>(begin: _lastMiddle, end: widget.middleProgress.clamp(0.0, 1.0))
-            .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-    _innerAnim =
-        Tween<double>(begin: _lastInner, end: widget.innerProgress.clamp(0.0, 1.0))
-            .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _outerAnim = Tween<double>(begin: _lastOuter, end: widget.outerProgress.clamp(0.0, 1.0))
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _middleAnim = Tween<double>(begin: _lastMiddle, end: widget.middleProgress.clamp(0.0, 1.0))
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _innerAnim = Tween<double>(begin: _lastInner, end: widget.innerProgress.clamp(0.0, 1.0))
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _innermostAnim = Tween<double>(begin: _lastInnermost, end: widget.innermostProgress.clamp(0.0, 1.0)) // NEW
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _controller.forward();
   }
@@ -98,7 +108,6 @@ class _ConcentricProgressState extends State<ConcentricProgress>
 
   @override
   Widget build(BuildContext context) {
-    // center widget sits on top of the paints
     return SizedBox(
       width: widget.size,
       height: widget.size,
@@ -110,9 +119,11 @@ class _ConcentricProgressState extends State<ConcentricProgress>
               outerProgress: _outerAnim.value,
               middleProgress: _middleAnim.value,
               innerProgress: _innerAnim.value,
+              innermostProgress: _innermostAnim.value, // NEW
               outerColor: widget.outerColor,
               middleColor: widget.middleColor,
               innerColor: widget.innerColor,
+              innermostColor: widget.innermostColor, // NEW
               strokeWidths: widget.strokeWidths,
             ),
             child: Center(child: widget.centerWidget ?? const SizedBox.shrink()),
@@ -127,42 +138,44 @@ class _ConcentricPainter extends CustomPainter {
   final double outerProgress;
   final double middleProgress;
   final double innerProgress;
+  final double innermostProgress; // NEW
+
   final Color outerColor;
   final Color middleColor;
   final Color innerColor;
+  final Color innermostColor; // NEW
+
   final List<double> strokeWidths;
 
   _ConcentricPainter({
     required this.outerProgress,
     required this.middleProgress,
     required this.innerProgress,
+    required this.innermostProgress, // NEW
     required this.outerColor,
     required this.middleColor,
     required this.innerColor,
+    required this.innermostColor, // NEW
     required this.strokeWidths,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
-
-    // We'll draw arcs from -90 degrees (top) clockwise
     const startAngle = -math.pi / 2;
 
-    // max radius is constrained by size and stroke widths so arcs don't overlap
     final maxPossibleRadius = (size.shortestSide / 2);
     final outerStroke = strokeWidths[0];
     final middleStroke = strokeWidths[1];
     final innerStroke = strokeWidths[2];
+    final innermostStroke = strokeWidths[3]; // NEW
 
-    // spacing between rings
     const ringSpacing = 6.0;
 
-    // outer radius
     final outerRadius = maxPossibleRadius - outerStroke / 2;
-    // middle inside outer
     final middleRadius = outerRadius - (outerStroke / 2) - (middleStroke / 2) - ringSpacing;
     final innerRadius = middleRadius - (middleStroke / 2) - (innerStroke / 2) - ringSpacing;
+    final innermostRadius = innerRadius - (innerStroke / 2) - (innermostStroke / 2) - ringSpacing; // NEW
 
     void drawArc(double radius, double progress, Color color, double stroke) {
       final paintBg = Paint()
@@ -178,19 +191,17 @@ class _ConcentricPainter extends CustomPainter {
         ..strokeCap = StrokeCap.round;
 
       final rect = Rect.fromCircle(center: center, radius: radius);
-      // background full circle (faint)
       canvas.drawArc(rect, 0, math.pi * 2, false, paintBg);
-      // foreground arc for progress (clamped 0..1)
       final sweep = (progress.clamp(0.0, 1.0)) * math.pi * 2;
       if (sweep > 0.001) {
         canvas.drawArc(rect, startAngle, sweep, false, paintFg);
       }
     }
 
-    // draw outer -> middle -> inner
     drawArc(outerRadius, outerProgress, outerColor, outerStroke);
     drawArc(middleRadius, middleProgress, middleColor, middleStroke);
     drawArc(innerRadius, innerProgress, innerColor, innerStroke);
+    drawArc(innermostRadius, innermostProgress, innermostColor, innermostStroke); // NEW
   }
 
   @override
@@ -198,8 +209,10 @@ class _ConcentricPainter extends CustomPainter {
     return old.outerProgress != outerProgress ||
         old.middleProgress != middleProgress ||
         old.innerProgress != innerProgress ||
+        old.innermostProgress != innermostProgress || // NEW
         old.outerColor != outerColor ||
         old.middleColor != middleColor ||
-        old.innerColor != innerColor;
+        old.innerColor != innerColor ||
+        old.innermostColor != innermostColor; // NEW
   }
 }

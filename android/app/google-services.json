@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "25006521774",
+    "firebase_url": "https://sakinasystem-default-rtdb.firebaseio.com",
+    "project_id": "sakinasystem",
+    "storage_bucket": "sakinasystem.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:25006521774:android:5bf5c3b2a7658b04895c3f",
+        "android_client_info": {
+          "package_name": "com.praying.app.praying_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-cB_sLfQ2B00RlnTqDddKHYhFVcZfLKg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

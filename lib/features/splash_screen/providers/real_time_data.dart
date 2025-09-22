@@ -8,11 +8,11 @@ final realtimeDataStateProvider = StateProvider<Map<String, dynamic>?>(
 final realtimeDatabaseProvider =
     StreamProvider.family<Map<String, dynamic>?, String>((ref, path) {
       final refDb = FirebaseDatabase.instance.ref(path);
-
       return refDb.onValue.map((event) {
         if (event.snapshot.exists && event.snapshot.value is Map) {
           final data = Map<String, dynamic>.from(event.snapshot.value as Map);
           ref.read(realtimeDataStateProvider.notifier).state = data;
+          print(data);
           return data;
         }
         return null;

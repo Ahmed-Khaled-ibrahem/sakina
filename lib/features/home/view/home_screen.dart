@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:praying_app/features/home/view/widgets/counter.dart';
 import 'package:praying_app/features/home/view/widgets/progress_bar.dart';
 import 'package:timeline_tile/timeline_tile.dart';
+import '../../splash_screen/providers/prayer_entry.dart';
 import '../provider/city_provider.dart';
 import '../provider/prayer_provider.dart';
 
@@ -15,11 +16,37 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool isNawaflOn = false;
+
+  bool isPrayerDone(DateTime target, DateTime nextTarget) {
+    final entries = ref.read(todaysEntriesProvider);
+    for (final e in entries) {
+      if (e.category == 'praying') {
+        if (e.dateTime.isAfter(target) && e.dateTime.isBefore(nextTarget)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  bool isNaflaDone(DateTime target, DateTime nextTarget) {
+    final entries = ref.read(todaysEntriesProvider);
+    for (final e in entries) {
+      if (e.category == 'nawafl') {
+        if (e.dateTime.isAfter(target) && e.dateTime.isBefore(nextTarget)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    print('building...');
     final cityAsync = ref.watch(locationProvider);
     final asyncPrayer = ref.watch(prayerProvider);
+    final entries = ref.watch(todaysEntriesProvider);
 
     return Scaffold(
       backgroundColor: Color(0xFF3551F2),
@@ -195,7 +222,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(child: Text("Error")),
             ),
-            SizedBox(height: 10),
+
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -209,36 +236,140 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 child: asyncPrayer.when(
                   data: (data) => Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: [
-                        PrayItemList(
-                          prayName: 'Fajr',
-                          prayTime: data.timings.fajr,
-                          index: 0,
-                        ),
-                        PrayItemList(
-                          prayName: 'Dhuhr',
-                          prayTime: data.timings.dhuhr,
-                          index: 1,
-                        ),
-                        PrayItemList(
-                          prayName: 'Asr',
-                          prayTime: data.timings.asr,
-                          index: 2,
-                        ),
-                        PrayItemList(
-                          prayName: 'Maghrib',
-                          prayTime: data.timings.maghrib,
-                          index: 3,
-                        ),
-                        PrayItemList(
-                          prayName: 'Isha',
-                          prayTime: data.timings.isha,
-                          index: 4,
-                        ),
-                      ],
+                    padding: const EdgeInsets.only(top: 2, left: 20, right: 20),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            width: double.infinity,
+                            child: SegmentedButton<bool>(
+                             expandedInsets: EdgeInsets.all(0),
+                              segments: const <ButtonSegment<bool>>[
+                                ButtonSegment<bool>(
+                                  value: false,
+                                  label: Text('Farida', style: TextStyle(fontSize: 12)),
+                                ),
+                                ButtonSegment<bool>(
+                                  value: true,
+                                  label: Text('Nawafel', style: TextStyle(fontSize: 12)),
+                                ),
+                              ],
+                              selected: <bool>{isNawaflOn},
+                              onSelectionChanged: (selection) {
+                               setState(() {
+                                 isNawaflOn = selection.first;
+                               });
+                              },
+                            ),
+                          ),
+                          Builder(
+                            builder: (context) {
+                              if(isNawaflOn){
+                                return ListView(
+                                  shrinkWrap: true,
+                                  children: [
+                                    PrayItemList(
+                                      prayName: 'Before Fajr',
+                                      prayTime: data.timings.fajr,
+                                      index: 0,
+                                      isDone: isNaflaDone(
+                                        parseTime(data.timings.fajr).subtract(Duration(hours: 1)),
+                                        parseTime(data.timings.fajr).add(Duration(minutes: 10)),
+                                      ),
+                                    ),
+                                    PrayItemList(
+                                      prayName: 'Before Dhuhr',
+                                      prayTime: data.timings.dhuhr,
+                                      index: 1,
+                                      isDone: isNaflaDone(
+                                        parseTime(data.timings.dhuhr).subtract(Duration(hours: 1)),
+                                        parseTime(data.timings.dhuhr),
+                                      ),
+                                    ),
+                                    PrayItemList(
+                                      prayName: 'After Dhuhr',
+                                      prayTime: data.timings.asr,
+                                      index: 2,
+                                      isDone: isNaflaDone(
+                                        parseTime(data.timings.dhuhr),
+                                        parseTime(data.timings.asr),
+                                      ),
+                                    ),
+                                    PrayItemList(
+                                      prayName: 'After Maghrib',
+                                      prayTime: data.timings.maghrib,
+                                      index: 3,
+                                      isDone: isNaflaDone(
+                                        parseTime(data.timings.maghrib),
+                                        parseTime(data.timings.isha),
+                                      ),
+                                    ),
+                                    PrayItemList(
+                                      prayName: 'After Isha',
+                                      prayTime: data.timings.isha,
+                                      index: 4,
+                                      isDone: isNaflaDone(
+                                        parseTime(data.timings.isha),
+                                        parseTime(data.timings.fajr).add(Duration(days: 1)),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+                              return ListView(
+                                shrinkWrap: true,
+                                children: [
+                                  PrayItemList(
+                                    prayName: 'Fajr',
+                                    prayTime: data.timings.fajr,
+                                    index: 0,
+                                    isDone: isPrayerDone(
+                                      parseTime(data.timings.fajr),
+                                      parseTime(data.timings.dhuhr),
+                                    ),
+                                  ),
+                                  PrayItemList(
+                                    prayName: 'Dhuhr',
+                                    prayTime: data.timings.dhuhr,
+                                    index: 1,
+                                    isDone: isPrayerDone(
+                                      parseTime(data.timings.dhuhr),
+                                      parseTime(data.timings.asr),
+                                    ),
+                                  ),
+                                  PrayItemList(
+                                    prayName: 'Asr',
+                                    prayTime: data.timings.asr,
+                                    index: 2,
+                                    isDone: isPrayerDone(
+                                      parseTime(data.timings.asr),
+                                      parseTime(data.timings.maghrib),
+                                    ),
+                                  ),
+                                  PrayItemList(
+                                    prayName: 'Maghrib',
+                                    prayTime: data.timings.maghrib,
+                                    index: 3,
+                                    isDone: isPrayerDone(
+                                      parseTime(data.timings.maghrib),
+                                      parseTime(data.timings.isha),
+                                    ),
+                                  ),
+                                  PrayItemList(
+                                    prayName: 'Isha',
+                                    prayTime: data.timings.isha,
+                                    index: 4,
+                                    isDone: isPrayerDone(
+                                      parseTime(data.timings.isha),
+                                      parseTime(data.timings.fajr).add(Duration(days: 1)),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   loading: () =>
@@ -266,12 +397,14 @@ class PrayItemList extends StatelessWidget {
   final String prayName;
   final String prayTime;
   final int index;
+  final bool isDone;
 
   const PrayItemList({
     super.key,
     required this.prayName,
     required this.prayTime,
     required this.index,
+    this.isDone = false,
   });
 
   @override
@@ -282,7 +415,7 @@ class PrayItemList extends StatelessWidget {
       isLast: index == 4,
       indicatorStyle: IndicatorStyle(
         width: 12,
-        padding: EdgeInsets.all(8),
+        padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
         color: isPrayerNow(prayTime)
             ? Colors.deepPurpleAccent
             : Colors.deepPurpleAccent.withOpacity(0.2),
@@ -298,7 +431,7 @@ class PrayItemList extends StatelessWidget {
       endChild: Column(
         children: [
           Container(
-            height: 70,
+            height: 65,
             decoration: BoxDecoration(
               color: Theme.of(context).brightness == Brightness.dark
                   ? Color(0xFF2C2F41)
@@ -350,7 +483,11 @@ class PrayItemList extends StatelessWidget {
                   onPressed: () {},
                   icon: Icon(Icons.notifications_active),
                 ),
-                IconButton(onPressed: () {}, icon: Icon(Icons.check_circle)),
+                Icon(
+                  Icons.check_circle,
+                  color: isDone ? Colors.green : Colors.grey,
+                ),
+                SizedBox(width: 10),
               ],
             ),
           ),

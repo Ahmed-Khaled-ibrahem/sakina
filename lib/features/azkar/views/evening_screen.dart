@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../model/azkar_model.dart';
@@ -111,7 +112,7 @@ class _DhikrScreenState extends State<DhikrScreen> {
               border: Border.all(color: Colors.white, width: 1),
             ),
             child: Text(
-              widget.isEvening ? 'Evening' : 'Morning',
+              widget.isEvening ? 'evening'.tr() : 'morning'.tr(),
               style: TextStyle(color: Colors.white, fontSize: 12),
             ),
           ),

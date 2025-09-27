@@ -1,22 +1,87 @@
+import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:praying_app/features/home/view/widgets/counter.dart';
 import 'package:praying_app/features/home/view/widgets/progress_bar.dart';
 import 'package:timeline_tile/timeline_tile.dart';
+import '../../../app/helpers/notifications.dart';
 import '../../splash_screen/providers/prayer_entry.dart';
 import '../provider/city_provider.dart';
 import '../provider/prayer_provider.dart';
+import '../provider/praying_bool_notifications.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
+
   @override
   ConsumerState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool isNawaflOn = false;
+  static const MethodChannel _channel = MethodChannel('android_app_settings');
+  List<bool> _values = List<bool>.filled(10, false);
+
+  Future<void> _loadPrefs() async {
+    final values = await BoolListPrefs.load();
+    setState(() => _values = values);
+  }
+
+  Future<void> _updateValue(int index, bool value) async {
+    setState(() => _values[index] = value);
+    await BoolListPrefs.save(_values);
+    setupPrayerNotifications(_values);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrefs();
+    requestNotificationPermission();
+    checkExactAlarmPermission();
+  }
+
+  Future<void> requestNotificationPermission() async {
+    if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
+  }
+
+  Future<void> checkExactAlarmPermission() async {
+    await ensureGranted();
+    final status = await Permission.scheduleExactAlarm.status;
+    debugPrint("⏰ Exact alarm permission: $status");
+  }
+
+  /// Check if exact alarm is already granted
+  static Future<bool> isGranted() async {
+    if (!Platform.isAndroid) return true;
+
+    final status = await Permission.scheduleExactAlarm.status;
+    return status.isGranted;
+  }
+
+  /// Ensure the permission is granted
+  static Future<void> ensureGranted() async {
+    if (!Platform.isAndroid) return;
+
+    final granted = await isGranted();
+    if (granted) {
+      debugPrint("✅ Exact alarm already granted");
+      return;
+    }
+
+    debugPrint("⚠️ Exact alarm not granted, opening settings...");
+    try {
+      await _channel.invokeMethod('requestExactAlarmPermission');
+    } catch (e) {
+      debugPrint("⚠️ Failed to request exact alarm: $e");
+    }
+  }
 
   bool isPrayerDone(DateTime target, DateTime nextTarget) {
     final entries = ref.read(todaysEntriesProvider);
@@ -242,28 +307,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           SizedBox(
                             width: double.infinity,
                             child: SegmentedButton<bool>(
-                             expandedInsets: EdgeInsets.all(0),
+                              expandedInsets: EdgeInsets.all(0),
                               segments: <ButtonSegment<bool>>[
                                 ButtonSegment<bool>(
                                   value: false,
-                                  label: Text('farida'.tr(), style: TextStyle(fontSize: 12)),
+                                  label: Text(
+                                    'farida'.tr(),
+                                    style: TextStyle(fontSize: 12),
+                                  ),
                                 ),
                                 ButtonSegment<bool>(
                                   value: true,
-                                  label: Text('nawafel'.tr(), style: TextStyle(fontSize: 12)),
+                                  label: Text(
+                                    'nawafel'.tr(),
+                                    style: TextStyle(fontSize: 12),
+                                  ),
                                 ),
                               ],
                               selected: <bool>{isNawaflOn},
                               onSelectionChanged: (selection) {
-                               setState(() {
-                                 isNawaflOn = selection.first;
-                               });
+                                setState(() {
+                                  isNawaflOn = selection.first;
+                                });
                               },
                             ),
                           ),
                           Builder(
                             builder: (context) {
-                              if(isNawaflOn){
+                              if (isNawaflOn) {
                                 return ListView(
                                   shrinkWrap: true,
                                   children: [
@@ -272,9 +343,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       prayTime: data.timings.fajr,
                                       index: 0,
                                       beforePrayTime: data.timings.fajr,
+                                      notificationIsOn: _values[5],
+                                      onChanged: _updateValue,
+                                      isNawafel: true,
                                       isDone: isNaflaDone(
-                                        parseTime(data.timings.fajr).subtract(Duration(hours: 1)),
-                                        parseTime(data.timings.fajr).add(Duration(minutes: 10)),
+                                        parseTime(
+                                          data.timings.fajr,
+                                        ).subtract(Duration(hours: 1)),
+                                        parseTime(
+                                          data.timings.fajr,
+                                        ).add(Duration(minutes: 10)),
                                       ),
                                     ),
                                     PrayItemList(
@@ -282,8 +360,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       prayTime: data.timings.dhuhr,
                                       beforePrayTime: data.timings.fajr,
                                       index: 1,
+                                      notificationIsOn: _values[6],
+                                      onChanged: _updateValue,
+                                      isNawafel: true,
                                       isDone: isNaflaDone(
-                                        parseTime(data.timings.dhuhr).subtract(Duration(hours: 1)),
+                                        parseTime(
+                                          data.timings.dhuhr,
+                                        ).subtract(Duration(hours: 1)),
                                         parseTime(data.timings.dhuhr),
                                       ),
                                     ),
@@ -292,6 +375,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       prayTime: data.timings.asr,
                                       beforePrayTime: data.timings.fajr,
                                       index: 2,
+                                      onChanged: _updateValue,
+                                      isNawafel: true,
+                                      notificationIsOn: _values[7],
                                       isDone: isNaflaDone(
                                         parseTime(data.timings.dhuhr),
                                         parseTime(data.timings.asr),
@@ -302,6 +388,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       prayTime: data.timings.maghrib,
                                       beforePrayTime: data.timings.asr,
                                       index: 3,
+                                      notificationIsOn: _values[8],
+                                      isNawafel: true,
+                                      onChanged: _updateValue,
                                       isDone: isNaflaDone(
                                         parseTime(data.timings.maghrib),
                                         parseTime(data.timings.isha),
@@ -312,9 +401,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       prayTime: data.timings.isha,
                                       beforePrayTime: data.timings.maghrib,
                                       index: 4,
+                                      onChanged: _updateValue,
+                                      notificationIsOn: _values[9],
+                                      isNawafel: true,
                                       isDone: isNaflaDone(
                                         parseTime(data.timings.isha),
-                                        parseTime(data.timings.fajr).add(Duration(days: 1)),
+                                        parseTime(
+                                          data.timings.fajr,
+                                        ).add(Duration(days: 1)),
                                       ),
                                     ),
                                   ],
@@ -328,6 +422,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     prayTime: data.timings.fajr,
                                     beforePrayTime: data.timings.fajr,
                                     index: 0,
+                                    isNawafel: false,
+                                    onChanged: _updateValue,
+                                    notificationIsOn: _values[0],
                                     isDone: isPrayerDone(
                                       parseTime(data.timings.fajr),
                                       parseTime(data.timings.dhuhr),
@@ -338,6 +435,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     prayTime: data.timings.dhuhr,
                                     beforePrayTime: data.timings.fajr,
                                     index: 1,
+                                    isNawafel: false,
+                                    onChanged: _updateValue,
+                                    notificationIsOn: _values[1],
                                     isDone: isPrayerDone(
                                       parseTime(data.timings.dhuhr),
                                       parseTime(data.timings.asr),
@@ -348,6 +448,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     prayTime: data.timings.asr,
                                     beforePrayTime: data.timings.dhuhr,
                                     index: 2,
+                                    isNawafel: false,
+                                    onChanged: _updateValue,
+                                    notificationIsOn: _values[2],
                                     isDone: isPrayerDone(
                                       parseTime(data.timings.asr),
                                       parseTime(data.timings.maghrib),
@@ -358,6 +461,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     prayTime: data.timings.maghrib,
                                     beforePrayTime: data.timings.asr,
                                     index: 3,
+                                    isNawafel: false,
+                                    onChanged: _updateValue,
+                                    notificationIsOn: _values[3],
                                     isDone: isPrayerDone(
                                       parseTime(data.timings.maghrib),
                                       parseTime(data.timings.isha),
@@ -368,14 +474,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     prayTime: data.timings.isha,
                                     beforePrayTime: data.timings.maghrib,
                                     index: 4,
+                                    isNawafel: false,
+                                    onChanged: _updateValue,
+                                    notificationIsOn: _values[4],
                                     isDone: isPrayerDone(
                                       parseTime(data.timings.isha),
-                                      parseTime(data.timings.fajr).add(Duration(days: 1)),
+                                      parseTime(
+                                        data.timings.fajr,
+                                      ).add(Duration(days: 1)),
                                     ),
                                   ),
                                 ],
                               );
-                            }
+                            },
                           ),
                         ],
                       ),
@@ -408,6 +519,9 @@ class PrayItemList extends StatelessWidget {
   final String beforePrayTime;
   final int index;
   final bool isDone;
+  final bool notificationIsOn;
+  final bool isNawafel;
+  final Function(int, bool) onChanged; // callback
 
   const PrayItemList({
     super.key,
@@ -416,6 +530,9 @@ class PrayItemList extends StatelessWidget {
     required this.beforePrayTime,
     required this.index,
     this.isDone = false,
+    this.notificationIsOn = false,
+    required this.onChanged,
+    required this.isNawafel ,
   });
 
   @override
@@ -491,8 +608,15 @@ class PrayItemList extends StatelessWidget {
                 ),
                 Spacer(),
                 IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.notifications_active),
+                  onPressed: () {
+                    onChanged(isNawafel ? index + 5 : index, !notificationIsOn); // use callback
+                  },
+                  color: notificationIsOn ? Colors.blue : Colors.grey,
+                  icon: Icon(
+                    notificationIsOn
+                        ? Icons.notifications_active
+                        : Icons.notifications_off,
+                  ),
                 ),
                 Icon(
                   Icons.check_circle,
@@ -526,11 +650,10 @@ class PrayItemList extends StatelessWidget {
     final now = DateTime.now();
     final target = parseTime(time);
     final beforeTarget = parseTime(beforeTime);
-    if(time==beforeTime){
+    if (time == beforeTime) {
       return now.isBefore(target);
     }
-    return now.isBefore(target) &&
-        now.isAfter(beforeTarget);
+    return now.isBefore(target) && now.isAfter(beforeTarget);
   }
 
   DateTime parseTime(String time) {

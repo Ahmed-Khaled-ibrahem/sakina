@@ -2,7 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../app/helpers/notifications.dart';
 import '../../app/routes/routes.dart';
+import 'package:timezone/timezone.dart' as tz;
+
 
 class AzkarScreen extends ConsumerWidget {
   const AzkarScreen({super.key});
@@ -150,6 +153,18 @@ class AzkarScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            // ElevatedButton(onPressed: ()async {
+            //   // showImmediateNotification();
+            //   // setupPrayerNotifications();
+            //   final now = TimeOfDay.fromDateTime(DateTime.now().add(Duration(minutes: 1)));
+            //   await scheduleNotification(99, "Test", "Test in 1 minute", now);
+            //
+            //   final now_ = DateTime.now();
+            //   debugPrint("📱 Device local time: $now_");
+            //   final tzNow = tz.TZDateTime.now(tz.local);
+            //   debugPrint("🌍 TZ local time: $tzNow");
+            //
+            // }, child: Text('test'))
           ],
         ),
       ),

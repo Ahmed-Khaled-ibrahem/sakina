@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../navigation_layout/provider/navigation_provider.dart';
 
 class QiblahCompass extends ConsumerWidget {
-  const QiblahCompass({super.key});
+  QiblahCompass({super.key});
+
+  bool isOnQibla = false;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,7 +24,11 @@ class QiblahCompass extends ConsumerWidget {
           }
 
           final qiblahDirection = snapshot.data;
-          print(qiblahDirection?.direction);
+
+          if(qiblahDirection == null){ return const Center(child: CircularProgressIndicator()); }
+          print(qiblahDirection.direction);
+          final temp = 360 - qiblahDirection.qiblah;
+          isOnQibla = temp.abs() < 10;
 
           return Center(
             child: Padding(
@@ -33,9 +39,9 @@ class QiblahCompass extends ConsumerWidget {
                 children: [
                   Transform.rotate(
                     angle:
-                        (qiblahDirection!.qiblah * (3.14159265359 / 180) * -1),
+                        (qiblahDirection.qiblah * (3.14159265359 / 180) * -1),
                     child: Image.asset(
-                      'assets/compass.png',
+                      isOnQibla? 'assets/compass.png' : 'assets/compass2.png',
                       height: 300,
                       width: 300,
                     ),
@@ -51,7 +57,7 @@ class QiblahCompass extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.yellow,
+                            color: Colors.blue,
                           ),
                         ),
                       ),
@@ -60,7 +66,7 @@ class QiblahCompass extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 80,
                           fontWeight: FontWeight.bold,
-                          color: Colors.yellowAccent,
+                          color: Colors.blue,
                         ),
                       ),
                     ],

@@ -43,7 +43,7 @@ class QiblaScreenState extends ConsumerState<QiblaScreen> {
           if (snapshot.hasError || snapshot.data == false) {
             return const Center(child: Text("Device doesn't support sensors"));
           }
-          return const QiblahCompass();
+          return QiblahCompass();
         },
       ),
     );

@@ -39,10 +39,26 @@ class _PrayerCountdownWidgetState extends State<PrayerCountdownWidget> {
       _nextPrayer = upcoming.first.key;
       _remaining = upcoming.first.value.difference(now);
     } else {
-      // if no prayers left today → pick the first one tomorrow
       final first = widget.prayers.entries.first;
       _nextPrayer = first.key;
       _remaining = first.value.add(const Duration(days: 1)).difference(now);
+    }
+  }
+
+  String nextPrayerLocal(String nextPrayer) {
+    switch (nextPrayer) {
+      case 'Fajr':
+        return 'fajr'.tr();
+      case 'Dhuhr':
+        return 'dhuhr'.tr();
+      case 'Asr':
+        return 'asr'.tr();
+      case 'Maghrib':
+        return 'maghrib'.tr();
+      case 'Isha':
+        return 'isha'.tr();
+      default:
+        return nextPrayer;
     }
   }
 
@@ -92,7 +108,7 @@ class _PrayerCountdownWidgetState extends State<PrayerCountdownWidget> {
                 children: [
                   const Icon(Icons.alarm, size: 60, color: Colors.tealAccent),
                   Text(
-                    "${'it_is_time_for'.tr()} $_nextPrayer!",
+                    "${'it_is_time_for'.tr()} ${nextPrayerLocal(_nextPrayer)}!",
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -105,7 +121,7 @@ class _PrayerCountdownWidgetState extends State<PrayerCountdownWidget> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "$_nextPrayer ${'will_start_in'.tr()}",
+                    "${nextPrayerLocal(_nextPrayer)} ${'will_start_in'.tr()}",
                     style: TextStyle(color: Colors.white),
                   ),
                   Text(

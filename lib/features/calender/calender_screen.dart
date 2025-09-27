@@ -48,7 +48,7 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
     updateValues();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Calender')),
+      appBar: AppBar(title: Text('calender'.tr())),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -69,11 +69,11 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            DateFormat("d MMMM y").format(DateTime.now()),
+                            DateFormat("d MMMM y", context.locale.languageCode).format(DateTime.now()),
                             style: const TextStyle(fontSize: 14),
                           ),
                           Text(
-                            'Today',
+                            'today'.tr(),
                             style: TextStyle(
                               fontSize: 40,
                               fontWeight: FontWeight.bold,
@@ -243,6 +243,7 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
   }
 
   Widget _buildDayWidget(DateTime day, {required bool isToday}) {
+    double progress = getProgress(day) ?? 0;
     return SizedBox(
       height: 40,
       width: 40,
@@ -250,11 +251,13 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
         alignment: Alignment.center,
         children: [
           CircularProgressIndicator(
-            value: getProgress(day) ?? 0,
+            value: progress,
             strokeWidth: 3,
             backgroundColor: Colors.grey.withOpacity(0.2),
             valueColor: AlwaysStoppedAnimation<Color>(
-              isToday ? Colors.blue : Colors.green,
+              isToday
+                  ? Colors.blue
+                  : (progress == 1 ? Colors.green : Colors.red),
             ),
           ),
 

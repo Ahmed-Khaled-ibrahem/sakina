@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class PrayerCountdownWidget extends StatefulWidget {
@@ -91,7 +92,7 @@ class _PrayerCountdownWidgetState extends State<PrayerCountdownWidget> {
                 children: [
                   const Icon(Icons.alarm, size: 60, color: Colors.tealAccent),
                   Text(
-                    "It's time for $_nextPrayer!",
+                    "${'it_is_time_for'.tr()} $_nextPrayer!",
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -104,7 +105,7 @@ class _PrayerCountdownWidgetState extends State<PrayerCountdownWidget> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "$_nextPrayer will start in",
+                    "$_nextPrayer ${'will_start_in'.tr()}",
                     style: TextStyle(color: Colors.white),
                   ),
                   Text(

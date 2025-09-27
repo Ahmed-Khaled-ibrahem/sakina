@@ -65,18 +65,18 @@ class SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             SizedBox(height: 8.h),
             SegmentedButton<ThemeMode>(
-              segments: const <ButtonSegment<ThemeMode>>[
+              segments: <ButtonSegment<ThemeMode>>[
                 ButtonSegment<ThemeMode>(
                   value: ThemeMode.system,
-                  label: Text('System'),
+                  label: Text('theme.system'.tr()),
                 ),
                 ButtonSegment<ThemeMode>(
                   value: ThemeMode.light,
-                  label: Text('Light'),
+                  label: Text('theme.light'.tr()),
                 ),
                 ButtonSegment<ThemeMode>(
                   value: ThemeMode.dark,
-                  label: Text('Dark'),
+                  label: Text('theme.dark'.tr()),
                 ),
               ],
               selected: <ThemeMode>{themeMode},
@@ -94,7 +94,7 @@ class SettingsScreenState extends ConsumerState<SettingsScreen> {
                 notifier.setValue(value);
               },
               decoration: InputDecoration(
-                labelText: 'Device ID'.tr(),
+                labelText: 'device.id'.tr(),
                 border: OutlineInputBorder(),
               ),
             ),
@@ -109,7 +109,7 @@ class SettingsScreenState extends ConsumerState<SettingsScreen> {
                 foregroundColor: MaterialStateProperty.all(Colors.white),
               ),
               child: authState.isLoading ? CircularProgressIndicator() : Text(
-                  'Logout'.tr()),
+                  'auth.logout'.tr()),
             ),
           ],
         ),

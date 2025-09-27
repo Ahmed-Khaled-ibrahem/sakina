@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../model/prayer_zekr_model.dart';
 import '../repo/azkar_helper.dart';
@@ -128,7 +129,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
               border: Border.all(color: Colors.white, width: 1),
             ),
             child: Text(
-              'after salah',
+              'after_salah'.tr(),
               style: TextStyle(color: Colors.white, fontSize: 12),
             ),
           ),

@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../app/routes/routes.dart';
 
 class AzkarScreen extends ConsumerWidget {
@@ -10,7 +10,7 @@ class AzkarScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Azkar')),
+      appBar: AppBar(title: Text('azkar'.tr())),
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -37,7 +37,7 @@ class AzkarScreen extends ConsumerWidget {
                               Row(
                                 children: [
                                   Text(
-                                    'Evening',
+                                    'evening'.tr(),
                                     style: TextStyle(
                                       color: Color(0xff3551F2),
                                       fontSize: 18,
@@ -86,7 +86,7 @@ class AzkarScreen extends ConsumerWidget {
                               Row(
                                 children: [
                                   Text(
-                                    'Morning',
+                                    'morning'.tr(),
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,
@@ -125,7 +125,7 @@ class AzkarScreen extends ConsumerWidget {
                             Align(
                               alignment: Alignment.center,
                               child: Text(
-                                'After Salah',
+                                'after_salah'.tr(),
                                 style: TextStyle(
                                   color: Color(0xffF9BF29),
                                   fontSize: 18,

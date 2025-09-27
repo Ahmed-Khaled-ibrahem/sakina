@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -98,7 +99,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
                         error: (err, _) {
-                          print(err);
                           return Text(
                             'error',
                             style: const TextStyle(color: Colors.white),
@@ -161,7 +161,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Fajr',
+                                  'fajr'.tr(),
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
@@ -187,7 +187,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Isha',
+                                  'isha'.tr(),
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
@@ -243,14 +243,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             width: double.infinity,
                             child: SegmentedButton<bool>(
                              expandedInsets: EdgeInsets.all(0),
-                              segments: const <ButtonSegment<bool>>[
+                              segments: <ButtonSegment<bool>>[
                                 ButtonSegment<bool>(
                                   value: false,
-                                  label: Text('Farida', style: TextStyle(fontSize: 12)),
+                                  label: Text('farida'.tr(), style: TextStyle(fontSize: 12)),
                                 ),
                                 ButtonSegment<bool>(
                                   value: true,
-                                  label: Text('Nawafel', style: TextStyle(fontSize: 12)),
+                                  label: Text('nawafel'.tr(), style: TextStyle(fontSize: 12)),
                                 ),
                               ],
                               selected: <bool>{isNawaflOn},
@@ -268,17 +268,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   shrinkWrap: true,
                                   children: [
                                     PrayItemList(
-                                      prayName: 'Before Fajr',
+                                      prayName: 'before_fajr'.tr(),
                                       prayTime: data.timings.fajr,
                                       index: 0,
+                                      beforePrayTime: data.timings.fajr,
                                       isDone: isNaflaDone(
                                         parseTime(data.timings.fajr).subtract(Duration(hours: 1)),
                                         parseTime(data.timings.fajr).add(Duration(minutes: 10)),
                                       ),
                                     ),
                                     PrayItemList(
-                                      prayName: 'Before Dhuhr',
+                                      prayName: 'before_dhuhr'.tr(),
                                       prayTime: data.timings.dhuhr,
+                                      beforePrayTime: data.timings.fajr,
                                       index: 1,
                                       isDone: isNaflaDone(
                                         parseTime(data.timings.dhuhr).subtract(Duration(hours: 1)),
@@ -286,8 +288,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ),
                                     ),
                                     PrayItemList(
-                                      prayName: 'After Dhuhr',
+                                      prayName: 'after_dhuhr'.tr(),
                                       prayTime: data.timings.asr,
+                                      beforePrayTime: data.timings.fajr,
                                       index: 2,
                                       isDone: isNaflaDone(
                                         parseTime(data.timings.dhuhr),
@@ -295,8 +298,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ),
                                     ),
                                     PrayItemList(
-                                      prayName: 'After Maghrib',
+                                      prayName: 'after_maghrib'.tr(),
                                       prayTime: data.timings.maghrib,
+                                      beforePrayTime: data.timings.asr,
                                       index: 3,
                                       isDone: isNaflaDone(
                                         parseTime(data.timings.maghrib),
@@ -304,8 +308,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ),
                                     ),
                                     PrayItemList(
-                                      prayName: 'After Isha',
+                                      prayName: 'after_isha'.tr(),
                                       prayTime: data.timings.isha,
+                                      beforePrayTime: data.timings.maghrib,
                                       index: 4,
                                       isDone: isNaflaDone(
                                         parseTime(data.timings.isha),
@@ -319,8 +324,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 shrinkWrap: true,
                                 children: [
                                   PrayItemList(
-                                    prayName: 'Fajr',
+                                    prayName: 'fajr'.tr(),
                                     prayTime: data.timings.fajr,
+                                    beforePrayTime: data.timings.fajr,
                                     index: 0,
                                     isDone: isPrayerDone(
                                       parseTime(data.timings.fajr),
@@ -328,8 +334,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ),
                                   ),
                                   PrayItemList(
-                                    prayName: 'Dhuhr',
+                                    prayName: 'dhuhr'.tr(),
                                     prayTime: data.timings.dhuhr,
+                                    beforePrayTime: data.timings.fajr,
                                     index: 1,
                                     isDone: isPrayerDone(
                                       parseTime(data.timings.dhuhr),
@@ -337,8 +344,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ),
                                   ),
                                   PrayItemList(
-                                    prayName: 'Asr',
+                                    prayName: 'asr'.tr(),
                                     prayTime: data.timings.asr,
+                                    beforePrayTime: data.timings.dhuhr,
                                     index: 2,
                                     isDone: isPrayerDone(
                                       parseTime(data.timings.asr),
@@ -346,8 +354,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ),
                                   ),
                                   PrayItemList(
-                                    prayName: 'Maghrib',
+                                    prayName: 'maghrib'.tr(),
                                     prayTime: data.timings.maghrib,
+                                    beforePrayTime: data.timings.asr,
                                     index: 3,
                                     isDone: isPrayerDone(
                                       parseTime(data.timings.maghrib),
@@ -355,8 +364,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ),
                                   ),
                                   PrayItemList(
-                                    prayName: 'Isha',
+                                    prayName: 'isha'.tr(),
                                     prayTime: data.timings.isha,
+                                    beforePrayTime: data.timings.maghrib,
                                     index: 4,
                                     isDone: isPrayerDone(
                                       parseTime(data.timings.isha),
@@ -395,6 +405,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 class PrayItemList extends StatelessWidget {
   final String prayName;
   final String prayTime;
+  final String beforePrayTime;
   final int index;
   final bool isDone;
 
@@ -402,6 +413,7 @@ class PrayItemList extends StatelessWidget {
     super.key,
     required this.prayName,
     required this.prayTime,
+    required this.beforePrayTime,
     required this.index,
     this.isDone = false,
   });
@@ -415,7 +427,7 @@ class PrayItemList extends StatelessWidget {
       indicatorStyle: IndicatorStyle(
         width: 12,
         padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-        color: isPrayerNow(prayTime)
+        color: isPrayerNow(prayTime, beforePrayTime)
             ? Colors.deepPurpleAccent
             : Colors.deepPurpleAccent.withOpacity(0.2),
       ),
@@ -510,11 +522,15 @@ class PrayItemList extends StatelessWidget {
     );
   }
 
-  bool isPrayerNow(String time) {
+  bool isPrayerNow(String time, String beforeTime) {
     final now = DateTime.now();
     final target = parseTime(time);
+    final beforeTarget = parseTime(beforeTime);
+    if(time==beforeTime){
+      return now.isBefore(target);
+    }
     return now.isBefore(target) &&
-        now.isAfter(target.subtract(const Duration(minutes: 30)));
+        now.isAfter(beforeTarget);
   }
 
   DateTime parseTime(String time) {

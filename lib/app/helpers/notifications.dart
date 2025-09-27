@@ -10,7 +10,7 @@ final FlutterLocalNotificationsPlugin notificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 Future<void> initNotifications() async {
-  const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const androidSettings = AndroidInitializationSettings('@mipmap/launcher_icon');
   const initSettings = InitializationSettings(android: androidSettings);
 
   await notificationsPlugin.initialize(
@@ -95,7 +95,7 @@ Future<void> showImmediateNotification() async {
     channelDescription: 'Channel for testing notifications',
     importance: Importance.max,
     priority: Priority.high,
-    icon: '@mipmap/ic_launcher',
+    icon: '@mipmap/launcher_icon',
     ticker: 'ticker',
     showWhen: true,
   );

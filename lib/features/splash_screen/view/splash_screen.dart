@@ -16,6 +16,11 @@ class SplashScreen extends ConsumerWidget {
       router.go(AppRoutes.login);
     });
 
-    return Center(child: Image.asset('assets/logo.png'));
+    return Scaffold(
+      body: Center(child: Padding(
+        padding: const EdgeInsets.all(30),
+        child: Image.asset('assets/logo.png'),
+      )),
+    );
   }
 }

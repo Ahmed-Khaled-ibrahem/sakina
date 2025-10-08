@@ -1,6 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:praying_app/app/helpers/colors.dart';
+import 'package:praying_app/features/azkar/views/progress_bar.dart';
 import '../model/azkar_model.dart';
 import '../repo/azkar_helper.dart';
 
@@ -162,6 +165,12 @@ class _DhikrScreenState extends State<DhikrScreen> {
                     child: ElevatedButton(
                       onPressed: previousDhikr,
                       child: const Icon(Icons.arrow_back_ios_outlined),
+                        style: ElevatedButton.styleFrom(
+                          elevation: 5,
+                          backgroundColor: Theme.of(context).brightness == Brightness.dark
+                              ? Color(0xFF3142A4)
+                              : Colors.white,
+                        )
                     ),
                   ),
                   Expanded(
@@ -172,8 +181,13 @@ class _DhikrScreenState extends State<DhikrScreen> {
                         elevation: 10,
                         padding: const EdgeInsets.all(18),
                         // size of the button
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.blue,
+                        backgroundColor:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Color(0xFF3142A4)
+                            : Colors.white,
+                        foregroundColor: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : AppColors.mainColor,
                       ),
                       child: Text(
                         '$remainingCount',
@@ -189,6 +203,12 @@ class _DhikrScreenState extends State<DhikrScreen> {
                     child: ElevatedButton(
                       onPressed: nextDhikr,
                       child: const Icon(Icons.arrow_forward_ios_outlined),
+                        style: ElevatedButton.styleFrom(
+                          elevation: 5,
+                          backgroundColor: Theme.of(context).brightness == Brightness.dark
+                              ? Color(0xFF3142A4)
+                              : Colors.white,
+                        )
                     ),
                   ),
                 ],
@@ -196,46 +216,68 @@ class _DhikrScreenState extends State<DhikrScreen> {
             ],
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
-            child: Center(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    dhikr.content.trim(),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                    textAlign: TextAlign.center,
+                  CustomProgressBar(
+                    percentage:
+                        currentIndex / (widget.dhikrList.length + 1) * 100,
+                    progressColor: AppColors.mainColor,
+                    backgroundColor: Colors.grey.shade300,
+                    height: 6,
                   ),
-                  if (dhikr.translation != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        dhikr.translation!,
-                        style: const TextStyle(fontSize: 16, color: Colors.grey),
-                        textAlign: TextAlign.center,
+                  SizedBox(
+                    height: 0.8.sh,
+                    child: Center(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            dhikr.content.trim(),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          if (dhikr.translation != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Text(
+                                dhikr.translation!,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          const SizedBox(height: 20),
+                          Divider(color: Colors.white, thickness: 0.5),
+                          Text(
+                            "Fadl: ${dhikr.fadl}",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          Text(
+                            "Source: ${dhikr.source}",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  const SizedBox(height: 20),
-                  Divider(color: Colors.white, thickness: 0.5),
-                  Text(
-                    "Fadl: ${dhikr.fadl}",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  Text(
-                    "Source: ${dhikr.source}",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 10, color: Colors.grey),
                   ),
                 ],
               ),

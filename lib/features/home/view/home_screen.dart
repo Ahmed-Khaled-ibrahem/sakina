@@ -3,12 +3,18 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:praying_app/features/home/view/widgets/counter.dart';
 import 'package:praying_app/features/home/view/widgets/progress_bar.dart';
+import 'package:praying_app/features/home/view/widgets/togle_button.dart';
 import 'package:timeline_tile/timeline_tile.dart';
+import 'package:toggle_switch/toggle_switch.dart';
+import '../../../app/helpers/colors.dart';
+import '../../../app/helpers/convert_to_12h.dart';
 import '../../../app/helpers/notifications.dart';
+import '../../../app/providers/all_app_provider.dart';
 import '../../splash_screen/providers/prayer_entry.dart';
 import '../provider/city_provider.dart';
 import '../provider/prayer_provider.dart';
@@ -112,9 +118,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final cityAsync = ref.watch(locationProvider);
     final asyncPrayer = ref.watch(prayerProvider);
     final entries = ref.watch(todaysEntriesProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final refreshValue = ref.watch(refreshProvider);
+
 
     return Scaffold(
-      backgroundColor: Color(0xFF3551F2),
+      backgroundColor: AppColors.mainColor,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -234,7 +243,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                 ),
                                 Text(
-                                  data.timings.fajr,
+                                  convertTo12Hour(
+                                    data.timings.fajr,
+                                    context.locale.languageCode,
+                                  ),
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
@@ -260,7 +272,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                 ),
                                 Text(
-                                  data.timings.isha,
+                                  convertTo12Hour(
+                                    data.timings.isha,
+                                    context.locale.languageCode,
+                                  ),
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
@@ -304,33 +319,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          SizedBox(
-                            width: double.infinity,
-                            child: SegmentedButton<bool>(
-                              expandedInsets: EdgeInsets.all(0),
-                              segments: <ButtonSegment<bool>>[
-                                ButtonSegment<bool>(
-                                  value: false,
-                                  label: Text(
-                                    'farida'.tr(),
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                                ButtonSegment<bool>(
-                                  value: true,
-                                  label: Text(
-                                    'nawafel'.tr(),
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                              ],
-                              selected: <bool>{isNawaflOn},
-                              onSelectionChanged: (selection) {
-                                setState(() {
-                                  isNawaflOn = selection.first;
-                                });
-                              },
-                            ),
+                          CustomToggle(
+                            isDark: isDark,
+                            isNawaflOn: isNawaflOn,
+                            onChanged: (val) {
+                              setState(() {
+                                isNawaflOn = val;
+                              });
+                            },
                           ),
                           Builder(
                             builder: (context) {
@@ -532,7 +528,7 @@ class PrayItemList extends StatelessWidget {
     this.isDone = false,
     this.notificationIsOn = false,
     required this.onChanged,
-    required this.isNawafel ,
+    required this.isNawafel,
   });
 
   @override
@@ -543,18 +539,18 @@ class PrayItemList extends StatelessWidget {
       isLast: index == 4,
       indicatorStyle: IndicatorStyle(
         width: 12,
-        padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
         color: isPrayerNow(prayTime, beforePrayTime)
-            ? Colors.deepPurpleAccent
-            : Colors.deepPurpleAccent.withOpacity(0.2),
+            ? AppColors.mainColor
+            : AppColors.mainColor.withOpacity(0.2),
       ),
       beforeLineStyle: LineStyle(
-        color: Colors.deepPurpleAccent.withOpacity(0.2),
-        thickness: 2,
+        color: AppColors.mainColor.withOpacity(0.2),
+        thickness: 1,
       ),
       afterLineStyle: LineStyle(
         color: Colors.deepPurpleAccent.withOpacity(0.2),
-        thickness: 2,
+        thickness: 1,
       ),
       endChild: Column(
         children: [
@@ -565,13 +561,11 @@ class PrayItemList extends StatelessWidget {
                   ? Color(0xFF2C2F41)
                   : Colors.white,
               borderRadius: BorderRadius.circular(25),
-              boxShadow: Theme.of(context).brightness == Brightness.dark
-                  ? null
-                  : [
+              boxShadow:  [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        spreadRadius: 2,
-                        blurRadius: 10,
+                        color: AppColors.mainColor.withOpacity(0.05),
+                        spreadRadius: 3,
+                        blurRadius: 7,
                         offset: Offset(0, 2),
                       ),
                     ],
@@ -581,7 +575,7 @@ class PrayItemList extends StatelessWidget {
             child: Row(
               spacing: 10,
               children: [
-                getPrayIconWidget(index),
+                getPrayIconWidget(index,context),
                 SingleChildScrollView(
                   scrollDirection: Axis.vertical,
                   child: Column(
@@ -596,7 +590,7 @@ class PrayItemList extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        prayTime,
+                        convertTo12Hour(prayTime, context.locale.languageCode),
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -609,9 +603,12 @@ class PrayItemList extends StatelessWidget {
                 Spacer(),
                 IconButton(
                   onPressed: () {
-                    onChanged(isNawafel ? index + 5 : index, !notificationIsOn); // use callback
+                    onChanged(
+                      isNawafel ? index + 5 : index,
+                      !notificationIsOn,
+                    ); // use callback
                   },
-                  color: notificationIsOn ? Colors.blue : Colors.grey,
+                  color: notificationIsOn ? AppColors.mainColor : Colors.grey,
                   icon: Icon(
                     notificationIsOn
                         ? Icons.notifications_active
@@ -619,8 +616,8 @@ class PrayItemList extends StatelessWidget {
                   ),
                 ),
                 Icon(
-                  Icons.check_circle,
-                  color: isDone ? Colors.green : Colors.grey,
+                  isDone ? Icons.check_circle : Icons.circle_outlined,
+                  color: isDone ? AppColors.mainColor : Colors.grey,
                 ),
                 SizedBox(width: 10),
               ],
@@ -631,17 +628,20 @@ class PrayItemList extends StatelessWidget {
     );
   }
 
-  Widget getPrayIconWidget(int index) {
+  Widget getPrayIconWidget(int index, context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withOpacity(0.1)
+            : AppColors.mainColor.withOpacity(0.08),
         borderRadius: BorderRadius.circular(10),
       ),
       child: SvgPicture.asset(
         'assets/icons/home/${index + 1}.svg',
         width: 40,
         height: 40,
-        color: Colors.blue,
+        color:Theme.of(context).brightness == Brightness.dark
+            ? Colors.grey: AppColors.mainColor,
       ),
     );
   }

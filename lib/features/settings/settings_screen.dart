@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:praying_app/features/settings/provider/device_id_provider.dart';
+import '../../app/providers/all_app_provider.dart';
 import '../../app/theme/theme_provider.dart';
 import '../auth/auth_provider/auth_provider.dart';
 
@@ -26,92 +27,98 @@ class SettingsScreenState extends ConsumerState<SettingsScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        appBar: AppBar(title: Text('settings.title'.tr())),
-        body: ListView(
-          padding: EdgeInsets.all(16),
-          children: [
-            Text(
-              'settings.language'.tr(),
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .titleMedium,
-            ),
-            SizedBox(height: 8.h),
-            SegmentedButton<Locale>(
-              segments: <ButtonSegment<Locale>>[
-                ButtonSegment<Locale>(
-                  value: const Locale('en'),
-                  label: Text('language.en'.tr()),
-                ),
-                ButtonSegment<Locale>(
-                  value: const Locale('ar'),
-                  label: Text('language.ar'.tr()),
-                ),
-              ],
-              selected: <Locale>{context.locale},
-              onSelectionChanged: (selection) async {
-                final Locale newLocale = selection.first;
-                await context.setLocale(newLocale);
-              },
-            ),
-            SizedBox(height: 24.h),
-            Text(
-              'settings.theme'.tr(),
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .titleMedium,
-            ),
-            SizedBox(height: 8.h),
-            SegmentedButton<ThemeMode>(
-              segments: <ButtonSegment<ThemeMode>>[
-                ButtonSegment<ThemeMode>(
-                  value: ThemeMode.system,
-                  label: Text('theme.system'.tr()),
-                ),
-                ButtonSegment<ThemeMode>(
-                  value: ThemeMode.light,
-                  label: Text('theme.light'.tr()),
-                ),
-                ButtonSegment<ThemeMode>(
-                  value: ThemeMode.dark,
-                  label: Text('theme.dark'.tr()),
-                ),
-              ],
-              selected: <ThemeMode>{themeMode},
-              onSelectionChanged: (selection) {
-                ref
-                    .read(themeModeProvider.notifier)
-                    .setThemeMode(selection.first);
-              },
-            ),
-            SizedBox(height: 35.h),
-
-            TextField(
-              controller: controller,
-              onChanged: (value) {
-                notifier.setValue(value);
-              },
-              decoration: InputDecoration(
-                labelText: 'device.id'.tr(),
-                border: OutlineInputBorder(),
+        // appBar: AppBar(title: Text('settings.title'.tr())),
+        body: SafeArea(
+          child: ListView(
+            padding: EdgeInsets.all(16),
+            children: [
+              SizedBox(height: 0.03.sh),
+              Text("settings.title".tr(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 40),
+              Text(
+                'settings.language'.tr(),
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .titleMedium,
               ),
-            ),
-
-            SizedBox(height: 24.h),
-            FilledButton(
-              onPressed: () async {
-                await ref.read(authProvider.notifier).logout();
-              },
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.red),
-                foregroundColor: MaterialStateProperty.all(Colors.white),
+              SizedBox(height: 8.h),
+              SegmentedButton<Locale>(
+                segments: <ButtonSegment<Locale>>[
+                  ButtonSegment<Locale>(
+                    value: const Locale('en'),
+                    label: Text('language.en'.tr()),
+                  ),
+                  ButtonSegment<Locale>(
+                    value: const Locale('ar'),
+                    label: Text('language.ar'.tr()),
+                  ),
+                ],
+                selected: <Locale>{context.locale},
+                onSelectionChanged: (selection) async {
+                  final Locale newLocale = selection.first;
+                  await context.setLocale(newLocale);
+                  ref.read(refreshProvider.notifier).state++;
+                },
               ),
-              child: authState.isLoading ? CircularProgressIndicator() : Text(
-                  'auth.logout'.tr()),
-            ),
-          ],
+              SizedBox(height: 24.h),
+              Text(
+                'settings.theme'.tr(),
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .titleMedium,
+              ),
+              SizedBox(height: 8.h),
+              SegmentedButton<ThemeMode>(
+                segments: <ButtonSegment<ThemeMode>>[
+                  ButtonSegment<ThemeMode>(
+                    value: ThemeMode.system,
+                    label: Text('theme.system'.tr()),
+                  ),
+                  ButtonSegment<ThemeMode>(
+                    value: ThemeMode.light,
+                    label: Text('theme.light'.tr()),
+                  ),
+                  ButtonSegment<ThemeMode>(
+                    value: ThemeMode.dark,
+                    label: Text('theme.dark'.tr()),
+                  ),
+                ],
+                selected: <ThemeMode>{themeMode},
+                onSelectionChanged: (selection) {
+                  ref
+                      .read(themeModeProvider.notifier)
+                      .setThemeMode(selection.first);
+                },
+              ),
+              SizedBox(height: 35.h),
+
+              TextField(
+                controller: controller,
+                onChanged: (value) {
+                  notifier.setValue(value);
+                },
+                decoration: InputDecoration(
+                  labelText: 'device.id'.tr(),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+
+              SizedBox(height: 24.h),
+              FilledButton(
+                onPressed: () async {
+                  await ref.read(authProvider.notifier).logout();
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.red),
+                  foregroundColor: MaterialStateProperty.all(Colors.white),
+                ),
+                child: authState.isLoading ? CircularProgressIndicator() : Text(
+                    'auth.logout'.tr()),
+              ),
+            ],
+          ),
         ),
       ),
     );

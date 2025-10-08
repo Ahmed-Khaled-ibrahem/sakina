@@ -1,14 +1,15 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:praying_app/features/calender/widget/circules.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../../app/providers/all_app_provider.dart';
 import '../splash_screen/providers/prayer_entry.dart';
 import '../splash_screen/providers/real_time_data.dart';
 
 class CalenderScreen extends ConsumerStatefulWidget {
   const CalenderScreen({super.key});
-
   @override
   CalenderScreenState createState() => CalenderScreenState();
 }
@@ -46,181 +47,193 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
   Widget build(BuildContext context) {
     ref.watch(todaysEntriesProvider);
     updateValues();
+    final refreshValue = ref.watch(refreshProvider);
+
 
     return Scaffold(
-      appBar: AppBar(title: Text('calender'.tr())),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Card(
-              margin: const EdgeInsets.all(20),
-              color: Colors.grey.withOpacity(0.3),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+      // appBar: AppBar(title: Text('calender'.tr())),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: 0.04.sh),
+              Row(
+                children: [
+                  SizedBox(width: 0.05.sw),
+                  Text("calender".tr(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                ],
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            DateFormat("d MMMM y", context.locale.languageCode).format(DateTime.now()),
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                          Text(
-                            'today'.tr(),
-                            style: TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
+
+              Card(
+                margin: const EdgeInsets.all(20),
+                color: Colors.grey.withOpacity(0.3),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              DateFormat("d MMMM y", context.locale.languageCode).format(DateTime.now()),
+                              style: const TextStyle(fontSize: 14),
                             ),
-                          ),
-                          SizedBox(height: 20),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 5,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Image.asset(
-                                        'assets/icons/calender/1.png',
-                                        width: 20,
-                                      ),
-                                      Text(
-                                        '$todayPrays/5',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.blue,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 5,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Image.asset(
-                                        'assets/icons/calender/2.png',
-                                        width: 20,
-                                      ),
-                                      Text(
-                                        '$todayEx/10',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.orange,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 5,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Image.asset(
-                                        'assets/icons/calender/3.png',
-                                        width: 20,
-                                      ),
-                                      Text(
-                                        '$todayMistakes/10',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.green,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 5,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Image.asset(
-                                        'assets/icons/calender/4.png',
-                                        width: 20,
-                                      ),
-                                      Text(
-                                        '$todayNawafl/5',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.purple,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              'today'.tr(),
+                              style: TextStyle(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        ],
+                            SizedBox(height: 20),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Image.asset(
+                                          'assets/icons/calender/1.png',
+                                          width: 20,
+                                        ),
+                                        Text(
+                                          '$todayPrays/5',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.orange,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Image.asset(
+                                          'assets/icons/calender/2.png',
+                                          width: 20,
+                                        ),
+                                        Text(
+                                          '$todayEx/10',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Image.asset(
+                                          'assets/icons/calender/3.png',
+                                          width: 20,
+                                        ),
+                                        Text(
+                                          '$todayMistakes/10',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.blue,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Image.asset(
+                                          'assets/icons/calender/4.png',
+                                          width: 20,
+                                        ),
+                                        Text(
+                                          '$todayNawafl/5',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.green,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    ConcentricProgress(
-                      size: 150,
-                      outerProgress: todayPrays / 5,
-                      middleProgress: todayEx / 10,
-                      innerProgress: todayMistakes / 10,
-                      innermostProgress: todayNawafl / 5,
-                      innermostColor: Colors.purple,
-                      outerColor: Colors.blue,
-                      middleColor: Colors.orange,
-                      innerColor: Colors.green,
-                      strokeWidths: const [10, 10, 10, 10],
-                      duration: const Duration(seconds: 2),
-                    ),
-                  ],
+                      ConcentricProgress(
+                        size: 150,
+                        outerProgress: todayPrays / 5,
+                        middleProgress: todayEx / 10,
+                        innerProgress: todayMistakes / 10,
+                        innermostProgress: todayNawafl / 5,
+                        innermostColor: Colors.green,
+                        outerColor: Colors.orange,
+                        middleColor: Colors.white,
+                        innerColor: Colors.blue,
+                        strokeWidths: const [10, 10, 10, 10],
+                        duration: const Duration(seconds: 2),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(15),
-              child: TableCalendar(
-                calendarFormat: CalendarFormat.month,
-                headerStyle: const HeaderStyle(
-                  titleCentered: true,
-                  formatButtonVisible: false,
-                  titleTextStyle: TextStyle(fontSize: 16),
-                ),
-                locale: context.locale.languageCode,
-                firstDay: DateTime.utc(2020, 1, 1),
-                lastDay: DateTime.utc(2030, 12, 31),
-                focusedDay: DateTime.now(),
-                selectedDayPredicate: (day) => isSameDay(selectedDay, day),
-                daysOfWeekHeight: 30,
-                daysOfWeekStyle: const DaysOfWeekStyle(
-                  weekdayStyle: TextStyle(fontSize: 10),
-                  weekendStyle: TextStyle(fontSize: 10),
-                ),
-                calendarBuilders: CalendarBuilders(
-                  defaultBuilder: (context, day, _) {
-                    return _buildDayWidget(day, isToday: false);
-                  },
-                  todayBuilder: (c, d, e) {
-                    return _buildDayWidget(d, isToday: true);
-                  },
+              Padding(
+                padding: const EdgeInsets.all(15),
+                child: TableCalendar(
+                  calendarFormat: CalendarFormat.month,
+                  headerStyle: const HeaderStyle(
+                    titleCentered: true,
+                    formatButtonVisible: false,
+                    titleTextStyle: TextStyle(fontSize: 16),
+                  ),
+                  locale: context.locale.languageCode,
+                  firstDay: DateTime.utc(2020, 1, 1),
+                  lastDay: DateTime.utc(2030, 12, 31),
+                  focusedDay: DateTime.now(),
+                  selectedDayPredicate: (day) => isSameDay(selectedDay, day),
+                  daysOfWeekHeight: 30,
+                  daysOfWeekStyle: const DaysOfWeekStyle(
+                    weekdayStyle: TextStyle(fontSize: 10),
+                    weekendStyle: TextStyle(fontSize: 10),
+                  ),
+                  calendarBuilders: CalendarBuilders(
+                    defaultBuilder: (context, day, _) {
+                      return _buildDayWidget(day, isToday: false);
+                    },
+                    todayBuilder: (c, d, e) {
+                      return _buildDayWidget(d, isToday: true);
+                    },
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

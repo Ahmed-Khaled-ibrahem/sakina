@@ -14,6 +14,7 @@ class AppTheme {
       seedColor: const Color(0xFF66AAFF),
       brightness: Brightness.dark,
     ),
+      scaffoldBackgroundColor: Color(0xFF2C2F41),
     useMaterial3: true,
   );
 }

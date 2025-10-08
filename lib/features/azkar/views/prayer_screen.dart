@@ -1,10 +1,14 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:praying_app/features/azkar/views/progress_bar.dart';
+import '../../../app/helpers/colors.dart';
 import '../model/prayer_zekr_model.dart';
 import '../repo/azkar_helper.dart';
 
 class PrayerScreen extends StatefulWidget {
   const PrayerScreen({super.key});
+
   @override
   State<PrayerScreen> createState() => _PrayerScreenState();
 }
@@ -86,6 +90,12 @@ class _PrayerScreenState extends State<PrayerScreen> {
                     child: ElevatedButton(
                       onPressed: previousDhikr,
                       child: const Icon(Icons.arrow_back_ios_outlined),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 5,
+                        backgroundColor: Theme.of(context).brightness == Brightness.dark
+                            ? Color(0xFF3142A4)
+                            : Colors.white,
+                      )
                     ),
                   ),
                   Expanded(
@@ -93,11 +103,15 @@ class _PrayerScreenState extends State<PrayerScreen> {
                       onPressed: decreaseCount,
                       style: ElevatedButton.styleFrom(
                         shape: const CircleBorder(),
-                        elevation: 10,
+                        elevation: 5,
                         padding: const EdgeInsets.all(18),
-                        // size of the button
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.blue,
+                        backgroundColor:
+                            Theme.of(context).brightness == Brightness.dark
+                            ? Color(0xFF3142A4)
+                            : Colors.white,
+                        foregroundColor: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : AppColors.mainColor,
                       ),
                       child: Text(
                         '$remainingCount',
@@ -113,6 +127,12 @@ class _PrayerScreenState extends State<PrayerScreen> {
                     child: ElevatedButton(
                       onPressed: nextDhikr,
                       child: const Icon(Icons.arrow_forward_ios_outlined),
+                        style: ElevatedButton.styleFrom(
+                          elevation: 5,
+                          backgroundColor: Theme.of(context).brightness == Brightness.dark
+                              ? Color(0xFF3142A4)
+                              : Colors.white,
+                        )
                     ),
                   ),
                 ],
@@ -157,33 +177,55 @@ class _PrayerScreenState extends State<PrayerScreen> {
           surfaceTintColor: Colors.transparent,
           backgroundColor: Colors.transparent,
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  dhikr.arabicText,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                if (dhikr.translatedText.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      dhikr.translatedText,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: CustomProgressBar(
+                percentage: currentIndex / (dhikrList.length) * 100,
+                progressColor: AppColors.mainColor,
+                backgroundColor: Colors.grey.shade300,
+                height: 6,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                height: 0.7.sh,
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          dhikr.arabicText,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        if (dhikr.translatedText.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              dhikr.translatedText,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-              ],
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

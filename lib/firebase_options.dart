@@ -58,7 +58,6 @@ class DefaultFirebaseOptions {
     databaseURL: 'https://sakinasystem-default-rtdb.firebaseio.com',
     storageBucket: 'sakinasystem.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyClJkQMwxVMW_x8a5hTTOvNZiHqcTPzR6Y',
     appId: '1:25006521774:ios:ec5ed5fb61cded6a895c3f',
@@ -68,7 +67,6 @@ class DefaultFirebaseOptions {
     storageBucket: 'sakinasystem.firebasestorage.app',
     iosBundleId: 'com.praying.app.prayingApp',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyClJkQMwxVMW_x8a5hTTOvNZiHqcTPzR6Y',
     appId: '1:25006521774:ios:ec5ed5fb61cded6a895c3f',

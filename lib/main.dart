@@ -45,7 +45,6 @@ void main() {
         );
       };
 
-      // init timezone
       setupTimezone();
       await initNotifications();
 

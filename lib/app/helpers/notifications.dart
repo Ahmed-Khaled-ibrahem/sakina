@@ -10,8 +10,15 @@ final FlutterLocalNotificationsPlugin notificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 Future<void> initNotifications() async {
-  const androidSettings = AndroidInitializationSettings('@mipmap/launcher_icon');
-  const initSettings = InitializationSettings(android: androidSettings);
+  const androidSettings = AndroidInitializationSettings(
+    '@mipmap/launcher_icon',
+  );
+  const iosInit = DarwinInitializationSettings(); // 👈 required for iOS
+
+  const initSettings = InitializationSettings(
+    android: androidSettings,
+    iOS: iosInit,
+  );
 
   await notificationsPlugin.initialize(
     initSettings,
@@ -121,7 +128,7 @@ Future<void> scheduleNotification(
   bool repeatDaily = true,
 }) async {
   try {
-    if(!active){
+    if (!active) {
       return;
     }
     final now = DateTime.now();
@@ -270,7 +277,9 @@ Future<void> setupPrayerNotifications(List values) async {
     values[5],
     TimeOfDay(
       hour: parseTime(data.timings.fajr).subtract(Duration(minutes: 5)).hour,
-      minute: parseTime(data.timings.fajr).subtract(Duration(minutes: 5)).minute,
+      minute: parseTime(
+        data.timings.fajr,
+      ).subtract(Duration(minutes: 5)).minute,
     ),
     repeatDaily: true,
   );
@@ -282,7 +291,9 @@ Future<void> setupPrayerNotifications(List values) async {
     values[6],
     TimeOfDay(
       hour: parseTime(data.timings.dhuhr).subtract(Duration(minutes: 5)).hour,
-      minute: parseTime(data.timings.dhuhr).subtract(Duration(minutes: 5)).minute,
+      minute: parseTime(
+        data.timings.dhuhr,
+      ).subtract(Duration(minutes: 5)).minute,
     ),
     repeatDaily: true,
   );

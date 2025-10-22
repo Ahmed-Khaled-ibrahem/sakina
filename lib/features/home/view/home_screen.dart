@@ -3,14 +3,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:flutter_svg/svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:praying_app/features/home/view/widgets/counter.dart';
 import 'package:praying_app/features/home/view/widgets/progress_bar.dart';
 import 'package:praying_app/features/home/view/widgets/togle_button.dart';
 import 'package:timeline_tile/timeline_tile.dart';
-import 'package:toggle_switch/toggle_switch.dart';
 import '../../../app/helpers/colors.dart';
 import '../../../app/helpers/convert_to_12h.dart';
 import '../../../app/helpers/notifications.dart';
@@ -117,7 +116,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final cityAsync = ref.watch(locationProvider);
     final asyncPrayer = ref.watch(prayerProvider);
-    final entries = ref.watch(todaysEntriesProvider);
+    ref.watch(todaysEntriesProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final refreshValue = ref.watch(refreshProvider);
 

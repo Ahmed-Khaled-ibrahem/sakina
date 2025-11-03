@@ -52,23 +52,71 @@ List<PrayerEntry> parseRealtimeData(Map<String, dynamic> raw) {
   return entries;
 }
 
-List<PrayerEntry> filterToday(List<PrayerEntry> all) {
-  final now = DateTime.now();
+// Modified filter function that accepts any date
+List<PrayerEntry> filterByDate(List<PrayerEntry> all, DateTime targetDate) {
   return all
       .where(
         (entry) =>
-            entry.dateTime.year == now.year &&
-            entry.dateTime.month == now.month &&
-            entry.dateTime.day == now.day,
-      )
+    entry.dateTime.year == targetDate.year &&
+        entry.dateTime.month == targetDate.month &&
+        entry.dateTime.day == targetDate.day,
+  )
       .toList();
 }
 
+// State provider to hold the selected date (defaults to today)
+final selectedDateProvider = StateProvider<DateTime>((ref) {
+  return DateTime.now();
+});
 
+// Provider that returns entries for the selected date
+final dailyEntriesProvider = Provider<List<PrayerEntry>>((ref) {
+  final raw = ref.watch(realtimeDataStateProvider);
+  if (raw == null) return [];
+
+  final selectedDate = ref.watch(selectedDateProvider);
+  final parsed = parseRealtimeData(raw);
+  return filterByDate(parsed, selectedDate);
+});
+
+// Convenience provider for today's entries (optional - for backward compatibility)
 final todaysEntriesProvider = Provider<List<PrayerEntry>>((ref) {
   final raw = ref.watch(realtimeDataStateProvider);
   if (raw == null) return [];
 
   final parsed = parseRealtimeData(raw);
-  return filterToday(parsed);
+  return filterByDate(parsed, DateTime.now());
+});
+
+// Optional: Provider to get all parsed entries without filtering
+final allEntriesProvider = Provider<List<PrayerEntry>>((ref) {
+  final raw = ref.watch(realtimeDataStateProvider);
+  if (raw == null) return [];
+
+  return parseRealtimeData(raw);
+});
+
+// Optional: Provider to get entries for a specific date range
+final dateRangeEntriesProvider = Provider<List<PrayerEntry>>((ref) {
+  final raw = ref.watch(realtimeDataStateProvider);
+  if (raw == null) return [];
+
+  final startDate = ref.watch(startDateProvider);
+  final endDate = ref.watch(endDateProvider);
+
+  final parsed = parseRealtimeData(raw);
+
+  return parsed.where((entry) {
+    return entry.dateTime.isAfter(startDate.subtract(const Duration(days: 1))) &&
+        entry.dateTime.isBefore(endDate.add(const Duration(days: 1)));
+  }).toList();
+});
+
+// State providers for date range (optional)
+final startDateProvider = StateProvider<DateTime>((ref) {
+  return DateTime.now().subtract(const Duration(days: 7));
+});
+
+final endDateProvider = StateProvider<DateTime>((ref) {
+  return DateTime.now();
 });

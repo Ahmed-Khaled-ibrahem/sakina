@@ -10,13 +10,13 @@ import '../splash_screen/providers/real_time_data.dart';
 
 class CalenderScreen extends ConsumerStatefulWidget {
   const CalenderScreen({super.key});
+
   @override
   CalenderScreenState createState() => CalenderScreenState();
 }
 
 class CalenderScreenState extends ConsumerState<CalenderScreen> {
   DateTime focusedDay = DateTime.now();
-  DateTime? selectedDay;
 
   int todayPrays = 0;
   int todayEx = 0;
@@ -29,7 +29,7 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
     todayNawafl = 0;
     todayMistakes = 0;
 
-    final entries = ref.read(todaysEntriesProvider);
+    final entries = ref.read(dailyEntriesProvider);
     for (final e in entries) {
       if (e.category == 'ex') {
         todayEx++;
@@ -49,9 +49,7 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
     updateValues();
     final refreshValue = ref.watch(refreshProvider);
 
-
     return Scaffold(
-      // appBar: AppBar(title: Text('calender'.tr())),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -60,7 +58,13 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
               Row(
                 children: [
                   SizedBox(width: 0.05.sw),
-                  Text("calender".tr(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(
+                    "calender".tr(),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
 
@@ -81,13 +85,22 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              DateFormat("d MMMM y", context.locale.languageCode).format(DateTime.now()),
+                              DateFormat(
+                                "d MMMM y",
+                                context.locale.languageCode,
+                              ).format(focusedDay),
                               style: const TextStyle(fontSize: 14),
                             ),
                             Text(
-                              'today'.tr(),
+                              (focusedDay.day == DateTime.now().day &&
+                                      focusedDay.month ==
+                                          DateTime.now().month &&
+                                      focusedDay.year == DateTime.now().year)
+                                  ? 'today'.tr()
+                                  : '${focusedDay.day} ${DateFormat.MMMM(context.locale.languageCode).format(focusedDay)}',
+
                               style: TextStyle(
-                                fontSize: 40,
+                                fontSize: 35,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -215,8 +228,13 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
                   locale: context.locale.languageCode,
                   firstDay: DateTime.utc(2020, 1, 1),
                   lastDay: DateTime.utc(2030, 12, 31),
-                  focusedDay: DateTime.now(),
-                  selectedDayPredicate: (day) => isSameDay(selectedDay, day),
+                  focusedDay: focusedDay,
+                  onDaySelected: (day, f) {
+                    setState(() {
+                      focusedDay = day;
+                      ref.read(selectedDateProvider.notifier).state = focusedDay;
+                    });
+                  },
                   daysOfWeekHeight: 30,
                   daysOfWeekStyle: const DaysOfWeekStyle(
                     weekdayStyle: TextStyle(fontSize: 10),
@@ -257,6 +275,8 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
 
   Widget _buildDayWidget(DateTime day, {required bool isToday}) {
     double progress = getProgress(day) ?? 0;
+    bool isSelected = day == focusedDay;
+
     return SizedBox(
       height: 40,
       width: 40,
@@ -273,24 +293,32 @@ class CalenderScreenState extends ConsumerState<CalenderScreen> {
                   : (progress == 1 ? Colors.green : Colors.red),
             ),
           ),
-
           Container(
             height: 32,
             width: 32,
             decoration: BoxDecoration(
-              color: isToday
+              color: isSelected
+                  ? Colors.white
+                  : isToday
                   ? Colors.blue.withOpacity(0.3)
                   : Colors.transparent,
               shape: BoxShape.circle,
               border: Border.all(
-                color: isToday ? Colors.white : Colors.grey,
-                width: 0.5,
+                color: isSelected
+                    ? Colors.teal
+                    : isToday
+                    ? Colors.white
+                    : Colors.grey,
+                width: isSelected ? 1 : 0.5,
               ),
             ),
             child: Center(
               child: Text(
                 day.day.toString(),
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isSelected ? Colors.black : null,
+                ),
               ),
             ),
           ),

@@ -3,8 +3,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:praying_app/features/home/view/widgets/counter.dart';
 import 'package:praying_app/features/home/view/widgets/progress_bar.dart';
@@ -14,6 +14,7 @@ import '../../../app/helpers/colors.dart';
 import '../../../app/helpers/convert_to_12h.dart';
 import '../../../app/helpers/notifications.dart';
 import '../../../app/providers/all_app_provider.dart';
+import '../../../repo/firebase_services.dart';
 import '../../splash_screen/providers/prayer_entry.dart';
 import '../provider/city_provider.dart';
 import '../provider/prayer_provider.dart';
@@ -119,7 +120,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.watch(todaysEntriesProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final refreshValue = ref.watch(refreshProvider);
-
 
     return Scaffold(
       backgroundColor: AppColors.mainColor,
@@ -532,6 +532,7 @@ class PrayItemList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return TimelineTile(
       alignment: TimelineAlign.start,
       isFirst: index == 0,
@@ -560,21 +561,21 @@ class PrayItemList extends StatelessWidget {
                   ? Color(0xFF2C2F41)
                   : Colors.white,
               borderRadius: BorderRadius.circular(25),
-              boxShadow:  [
-                      BoxShadow(
-                        color: AppColors.mainColor.withOpacity(0.05),
-                        spreadRadius: 3,
-                        blurRadius: 7,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.mainColor.withOpacity(0.05),
+                  spreadRadius: 3,
+                  blurRadius: 7,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
             margin: EdgeInsets.all(5),
             padding: EdgeInsets.all(10),
             child: Row(
               spacing: 10,
               children: [
-                getPrayIconWidget(index,context),
+                getPrayIconWidget(index, context),
                 SingleChildScrollView(
                   scrollDirection: Axis.vertical,
                   child: Column(
@@ -614,9 +615,53 @@ class PrayItemList extends StatelessWidget {
                         : Icons.notifications_off,
                   ),
                 ),
-                Icon(
-                  isDone ? Icons.check_circle : Icons.circle_outlined,
-                  color: isDone ? AppColors.mainColor : Colors.grey,
+                GestureDetector(
+                  onTap: () async {
+                    if(isDone){
+                      return;
+                    }
+                    bool isArabic = context.locale.languageCode == 'ar';
+                    bool isConfirmed =
+                        await showDialog<bool>(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text(isArabic ? 'تأكيد' : 'Confirm'),
+                              content: Text(
+                                isArabic
+                                    ? 'هل أنت متأكد من أنك تريد تأكيد هذه الصلوات؟'
+                                    : 'Are you sure you want to mark this prayer as done?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  child: Text(isArabic ? 'نعم' : 'Yes'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop(true);
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text(isArabic ? 'لا' : 'No'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop(false);
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        ).then((bool? value) async {
+                          if (value == null) return false;
+                          if (value)  {
+                            print('Yes');
+                            final firebaseService = FirebaseService();
+                            await firebaseService.insertPrayerData(isNawafel ? "nawafl" : "praying", addTwoMinutes(prayTime));
+                          }
+                          return true;
+                        });
+                  },
+                  child: Icon(
+                    isDone ? Icons.check_circle : Icons.circle_outlined,
+                    color: isDone ? AppColors.mainColor : Colors.grey,
+                  ),
                 ),
                 SizedBox(width: 10),
               ],
@@ -639,10 +684,30 @@ class PrayItemList extends StatelessWidget {
         'assets/icons/home/${index + 1}.svg',
         width: 40,
         height: 40,
-        color:Theme.of(context).brightness == Brightness.dark
-            ? Colors.grey: AppColors.mainColor,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.grey
+            : AppColors.mainColor,
       ),
     );
+  }
+  String addTwoMinutes(String timeString) {
+    // Parse the original time (assuming it's in HH:mm format)
+    final parts = timeString.split(':');
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+
+    // Create a DateTime object for today with that time
+    final now = DateTime.now();
+    final time = DateTime(now.year, now.month, now.day, hour, minute);
+
+    // Add 2 minutes
+    final newTime = time.add(Duration(minutes: 2));
+
+    // Format back to HH:mm
+    final newHour = newTime.hour.toString().padLeft(2, '0');
+    final newMinute = newTime.minute.toString().padLeft(2, '0');
+
+    return "$newHour-$newMinute";
   }
 
   bool isPrayerNow(String time, String beforeTime) {
